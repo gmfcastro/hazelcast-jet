@@ -24,6 +24,7 @@ import com.hazelcast.jet.core.DAG;
 import com.hazelcast.jet.core.Vertex;
 import com.hazelcast.jet.core.processor.SinkProcessors;
 import com.hazelcast.jet.sql.cost.CostFactory;
+import com.hazelcast.jet.sql.imap.IMapProjectPhysicalRule;
 import com.hazelcast.jet.sql.imap.IMapScanPhysicalRule;
 import com.hazelcast.jet.sql.schema.JetSchema;
 import org.apache.calcite.adapter.java.JavaTypeFactory;
@@ -36,6 +37,7 @@ import org.apache.calcite.plan.Contexts;
 import org.apache.calcite.plan.ConventionTraitDef;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCostImpl;
+import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.plan.hep.HepPlanner;
 import org.apache.calcite.plan.hep.HepProgramBuilder;
 import org.apache.calcite.plan.volcano.AbstractConverter;
@@ -52,6 +54,7 @@ import org.apache.calcite.rel.metadata.JaninoRelMetadataProvider;
 import org.apache.calcite.rel.metadata.RelMetadataProvider;
 import org.apache.calcite.rel.rules.SubQueryRemoveRule;
 import org.apache.calcite.rex.RexBuilder;
+import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
@@ -208,6 +211,7 @@ public class JetSqlService {
         RelNode rel = convert(node);
 
         LogicalRel logicalRel = optimizeLogical(rel);
+        System.out.println(RelOptUtil.toString(logicalRel, SqlExplainLevel.ALL_ATTRIBUTES));
         PhysicalRel physicalRel = optimizePhysical(logicalRel);
 
         String observableName = "sql-sink-" + UUID.randomUUID().toString();
@@ -259,7 +263,7 @@ public class JetSqlService {
 //                SortPhysicalRule.INSTANCE,
 //                RootPhysicalRule.INSTANCE,
 //                FilterPhysicalRule.INSTANCE,
-//                ProjectPhysicalRule.INSTANCE,
+                IMapProjectPhysicalRule.INSTANCE,
                 IMapScanPhysicalRule.INSTANCE,
 //                AggregatePhysicalRule.INSTANCE,
 //                JoinPhysicalRule.INSTANCE,
